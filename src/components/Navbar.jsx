@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 
 // ============================================================
-// 1. CONFIGURATION – पूरा डायनामिक
+// 1. CONFIGURATION
 // ============================================================
 const SITE_NAME = "Vistara Stories";
 
@@ -15,7 +15,6 @@ const NAV_LINKS = [
 
 const CTA = {
   label: "Get In Touch",
-  to: "/contact",
 };
 
 // ============================================================
@@ -71,13 +70,28 @@ export default function Navbar() {
     };
   }, []);
 
+  // ---------- Dynamic links: "Portfolio" → "Home" when on /portfolio ----------
+  const dynamicLinks = useMemo(() => {
+    return NAV_LINKS.map(link => {
+      if (link.id === "portfolio" && location.pathname === "/portfolio") {
+        return {
+          ...link,
+          label: "Home",
+          to: "/",
+        };
+      }
+      return link;
+    });
+  }, [location.pathname]);
+
+  // ---------- Navigation handlers ----------
   const handleNavClick = (link) => {
     setIsMenuOpen(false);
     if (link.type === "route") {
       navigate(link.to);
       return;
     }
-    // anchor
+    // Anchor
     if (window.location.pathname !== "/") {
       navigate("/");
       setTimeout(() => {
@@ -88,18 +102,38 @@ export default function Navbar() {
     }
   };
 
+  // 🔥 FIXED: "Get In Touch" handler – 500ms delay + fallback
+  const handleContactClick = () => {
+    setIsMenuOpen(false);
+    if (window.location.pathname !== "/") {
+      navigate("/");
+      setTimeout(() => {
+        const el = document.getElementById("contact");
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth" });
+        } else {
+          navigate("/contact"); // fallback
+        }
+      }, 500); // increased for mobile reliability
+    } else {
+      const el = document.getElementById("contact");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+      } else {
+        navigate("/contact");
+      }
+    }
+  };
+
   const isActive = (link) => {
     if (link.type === "route") return location.pathname === link.to;
     return false;
   };
 
-  // Dynamic background opacity
   const bgOpacity = Math.min(scrollY / 200, 0.85);
 
-  // Get visible links based on screen size (we'll use Tailwind classes)
-  // tablet: md, desktop: lg
-  const tabletLinks = NAV_LINKS.filter((l) => l.showOn.tablet);
-  const desktopLinks = NAV_LINKS.filter((l) => l.showOn.desktop);
+  const tabletLinks = dynamicLinks.filter((l) => l.showOn.tablet);
+  const desktopLinks = dynamicLinks.filter((l) => l.showOn.desktop);
 
   return (
     <>
@@ -126,7 +160,6 @@ export default function Navbar() {
 
           {/* ---------- RIGHT SIDE: LINKS + CTA + HAMBURGER ---------- */}
           <div className="flex items-center gap-3 md:gap-4 lg:gap-6">
-            {/* Tablet+ visible links */}
             <div className="hidden md:flex items-center gap-4 lg:gap-6">
               {tabletLinks.map((link) => (
                 <NavItem
@@ -137,7 +170,6 @@ export default function Navbar() {
                   className="hidden md:flex"
                 />
               ))}
-              {/* Desktop‑only extra links */}
               {desktopLinks
                 .filter((l) => !l.showOn.tablet)
                 .map((link) => (
@@ -151,15 +183,12 @@ export default function Navbar() {
                 ))}
             </div>
 
-            {/* CTA Button – visible on tablet+ */}
             <CTAButton
               label={CTA.label}
-              to={CTA.to}
-              onClick={() => setIsMenuOpen(false)}
+              onClick={handleContactClick}
               className="hidden md:inline-block"
             />
 
-            {/* Hamburger – hidden on desktop, visible on tablet & mobile */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="lg:hidden flex items-center justify-center text-white p-2 rounded-full hover:bg-white/10 transition-colors"
@@ -175,10 +204,11 @@ export default function Navbar() {
       {/* ---------- DROPDOWN (mobile + tablet) ---------- */}
       <DropdownMenu
         isOpen={isMenuOpen}
-        links={NAV_LINKS}
+        links={dynamicLinks}
         cta={CTA}
         activeCheck={isActive}
         onLinkClick={handleNavClick}
+        onCTAClick={handleContactClick}
         bgOpacity={bgOpacity}
       />
 
@@ -191,7 +221,7 @@ export default function Navbar() {
         />
       )}
 
-      {/* ---------- GLOBAL STYLES (animations) ---------- */}
+      {/* ---------- GLOBAL STYLES ---------- */}
       <style>{`
         @keyframes fadeSlideIn {
           0% { opacity: 0; transform: translateY(16px) scale(0.96); }
@@ -224,8 +254,6 @@ export default function Navbar() {
 // ============================================================
 // 5. SUB‑COMPONENTS
 // ============================================================
-
-// ---------- NavItem (single link) ----------
 const NavItem = ({ link, isActive, onClick, className }) => (
   <button
     onClick={onClick}
@@ -240,10 +268,8 @@ const NavItem = ({ link, isActive, onClick, className }) => (
   </button>
 );
 
-// ---------- CTA Button ----------
-const CTAButton = ({ label, to, onClick, className }) => (
-  <Link
-    to={to}
+const CTAButton = ({ label, onClick, className }) => (
+  <button
     onClick={onClick}
     className={`${className} px-4 py-1.5 text-white rounded-full text-sm font-semibold transition-all duration-300 backdrop-blur-sm border border-white/20 hover:scale-105 hover:shadow-lg hover:shadow-white/20 relative overflow-hidden group`}
     style={{
@@ -252,11 +278,10 @@ const CTAButton = ({ label, to, onClick, className }) => (
   >
     <span className="relative z-10">{label}</span>
     <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-  </Link>
+  </button>
 );
 
-// ---------- Dropdown Menu (fully dynamic) ----------
-const DropdownMenu = ({ isOpen, links, cta, activeCheck, onLinkClick, bgOpacity }) => {
+const DropdownMenu = ({ isOpen, links, cta, activeCheck, onLinkClick, onCTAClick, bgOpacity }) => {
   return (
     <div
       className={`lg:hidden fixed top-20 left-0 w-full px-4 z-40 transition-all duration-500 ease-in-out ${
@@ -299,8 +324,7 @@ const DropdownMenu = ({ isOpen, links, cta, activeCheck, onLinkClick, bgOpacity 
           })}
           <CTAButton
             label={cta.label}
-            to={cta.to}
-            onClick={() => {}}
+            onClick={onCTAClick}
             className="mt-4 px-6 py-3 text-center w-full"
           />
         </div>
