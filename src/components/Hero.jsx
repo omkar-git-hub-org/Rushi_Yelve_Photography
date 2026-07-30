@@ -1,9 +1,9 @@
 // =====================================================================
 // SECTION: IMPORTS
 // =====================================================================
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";  // ← ADDED
 import { SITE_TAGLINE, ESTABLISHED_YEAR, IMAGES } from "../constants/theme";
-import { Link } from "react-router-dom";
 
 // =====================================================================
 // SECTION: CUSTOM HOOK – Parallax Scroll
@@ -59,7 +59,7 @@ const HeroBackground = ({ imageSrc, altText }) => {
 // =====================================================================
 // SECTION: SUBCOMPONENT – Hero Content
 // =====================================================================
-const HeroContent = ({ tagline, establishedYear }) => {
+const HeroContent = ({ tagline, establishedYear, onExploreClick }) => {
   const words = tagline.split(" ");
 
   return (
@@ -84,7 +84,7 @@ const HeroContent = ({ tagline, establishedYear }) => {
           Professional Photography by Elara Studio. Fine art storytelling for the meticulous soul.
         </p>
         <div className="mt-6 sm:mt-8 lg:mt-10 animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
-          <HeroButton />
+          <HeroButton onClick={onExploreClick} />
         </div>
       </div>
     </div>
@@ -92,28 +92,22 @@ const HeroContent = ({ tagline, establishedYear }) => {
 };
 
 // =====================================================================
-// SECTION: SUBCOMPONENT – Hero Button
+// SECTION: SUBCOMPONENT – Hero Button (now accepts onClick)
 // =====================================================================
-const HeroButton = () => {
-  const handleClick = () => {
-    const portfolio = document.getElementById("portfolio");
-    if (portfolio) portfolio.scrollIntoView({ behavior: "smooth" });
-  };
-  return (
-    <button
-      onClick={handleClick}
-      className="group relative px-8 sm:px-10 py-3 sm:py-4 border-2 border-primary/60 hover:border-primary 
-                 text-label-caps text-sm sm:text-base font-label-caps text-primary 
-                 hover:bg-primary hover:text-background transition-all duration-500 uppercase tracking-widest 
-                 rounded-full backdrop-blur-sm bg-primary/5 hover:shadow-lg hover:shadow-primary/20 
-                 transform hover:scale-105 active:scale-95 overflow-hidden"
-    >
-      <span className="relative z-10">Explore Work</span>
-      <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 
-                       bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-    </button>
-  );
-};
+const HeroButton = ({ onClick }) => (
+  <button
+    onClick={onClick}
+    className="group relative px-8 sm:px-10 py-3 sm:py-4 border-2 border-primary/60 hover:border-primary 
+               text-label-caps text-sm sm:text-base font-label-caps text-primary 
+               hover:bg-primary hover:text-background transition-all duration-500 uppercase tracking-widest 
+               rounded-full backdrop-blur-sm bg-primary/5 hover:shadow-lg hover:shadow-primary/20 
+               transform hover:scale-105 active:scale-95 overflow-hidden"
+  >
+    <span className="relative z-10">Explore Work</span>
+    <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 
+                     bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+  </button>
+);
 
 // =====================================================================
 // SECTION: SUBCOMPONENT – Scroll Indicator
@@ -130,28 +124,32 @@ const ScrollIndicator = () => (
 // SECTION: MAIN COMPONENT – Hero
 // =====================================================================
 export default function Hero() {
+  const navigate = useNavigate();  // ← NEW
+
   const tagline = SITE_TAGLINE;
   const established = ESTABLISHED_YEAR;
   const image = IMAGES.hero;
 
+  // 🔥 Handler to navigate to the portfolio gallery page
+  const handleExploreClick = () => {
+    navigate("/portfolio");
+  };
+
   return (
-    // Outer container: adds padding and rounded corners
     <div className="w-full px-4 sm:px-6 lg:px-8 pt-28 sm:pt-24 md:pt-24 pb-8 md:pb-8">
       <section
         className="relative w-full overflow-hidden rounded-2xl sm:rounded-3xl shadow-2xl
                    min-h-[76vh] sm:min-h-[65vh] md:min-h-[85vh] lg:min-h-[80vh]
                    flex items-center justify-center"
       >
-        {/* Background */}
         <HeroBackground imageSrc={image} altText={image.alt} />
-
-        {/* Content */}
-        <HeroContent tagline={tagline} establishedYear={established} />
-
-        {/* Scroll indicator */}
+        <HeroContent
+          tagline={tagline}
+          establishedYear={established}
+          onExploreClick={handleExploreClick}  // ← PASSED
+        />
         <ScrollIndicator />
 
-        {/* ===== KEYFRAME ANIMATIONS ===== */}
         <style>{`
           @keyframes fade-in-up {
             0% { opacity: 0; transform: translateY(30px); }
@@ -161,7 +159,6 @@ export default function Hero() {
             animation: fade-in-up 0.8s ease-out forwards;
             opacity: 0;
           }
-
           @keyframes scroll-down {
             0% { opacity: 1; transform: translateY(0); }
             100% { opacity: 0; transform: translateY(12px); }
@@ -169,7 +166,6 @@ export default function Hero() {
           .animate-scroll-down {
             animation: scroll-down 1.5s ease-in-out infinite;
           }
-
           .text-on-surface { color: #ffffff; }
           .text-on-surface-variant { color: rgba(255,255,255,0.8); }
           .text-primary { color: #ffffff; }
@@ -186,7 +182,7 @@ export default function Hero() {
 }
 
 // =====================================================================
-// SECTION: ADDITIONAL UTILITIES (for completeness)
+// SECTION: ADDITIONAL UTILITIES
 // =====================================================================
 export const HeroSkeleton = () => (
   <div className="w-full min-h-[70vh] lg:min-h-[80vh] bg-gray-800 animate-pulse flex items-center justify-center rounded-2xl sm:rounded-3xl">
