@@ -105,8 +105,8 @@ export default function Testimonial() {
             }`}
           >
             <TestimonialCard
-              quote="Elara has an uncanny ability to find beauty in the most unexpected places. Her work for our wedding didn't just document the day; it transformed it into a masterpiece of memory."
-              author="Julian &amp; Sophia Vance"
+              quote="Rushi has an uncanny ability to find beauty in the most unexpected places. Her work for our wedding didn't just document the day; it transformed it into a masterpiece of memory."
+              author="Shruti &amp; Ajay"
             />
           </div>
         </Container>

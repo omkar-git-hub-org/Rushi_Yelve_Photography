@@ -7,7 +7,7 @@ import Container from "./Container";
 // =====================================================================
 // SECTION: CONSTANTS
 // =====================================================================
-const STUDIO_PHONE = "+919322749473";
+const STUDIO_PHONE = "+917741019816";
 const WHATSAPP_MESSAGE = "Hi, I'm interested in booking a session. Can you share more information?";
 
 // =====================================================================
@@ -15,16 +15,17 @@ const WHATSAPP_MESSAGE = "Hi, I'm interested in booking a session. Can you share
 // =====================================================================
 const GlassButton = ({ children, onClick, variant = "primary", className = "" }) => {
   const baseClasses = `
-    group relative w-full sm:w-auto px-8 sm:px-10 md:px-12 
-    py-4 sm:py-4 md:py-5 
-    font-label-caps text-sm md:text-base font-bold 
+    group relative w-full sm:w-auto 
+    px-6 sm:px-8 md:px-10 
+    py-2.5 sm:py-3 md:py-3.5 
+    font-label-caps text-xs sm:text-sm font-bold 
     uppercase tracking-[0.2em] 
     rounded-full 
     transition-all duration-500 
     hover:scale-105 
     active:scale-95 
     overflow-hidden
-    backdrop-blur-sm
+    backdrop-blur-md
     cursor-pointer
     ${className}
   `;
@@ -35,16 +36,16 @@ const GlassButton = ({ children, onClick, variant = "primary", className = "" })
         onClick={onClick}
         className={`
           ${baseClasses}
-          bg-primary/20 text-primary 
-          border border-primary/40 
-          hover:bg-primary/30 
-          hover:shadow-lg hover:shadow-primary/20 
+          bg-primary/25 text-primary 
+          border border-primary/50 
+          hover:bg-primary/35 
+          hover:shadow-xl hover:shadow-primary/20 
           hover:border-primary
         `}
       >
         <span className="relative z-10">{children}</span>
         <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/30 to-transparent" />
-        <span className="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors duration-500 -z-10" />
+        <span className="absolute inset-0 bg-primary/10 group-hover:bg-primary/20 transition-colors duration-500 -z-10" />
       </button>
     );
   }
@@ -59,7 +60,7 @@ const GlassButton = ({ children, onClick, variant = "primary", className = "" })
         hover:bg-white/15 
         hover:border-primary/50 
         hover:text-primary 
-        hover:shadow-lg hover:shadow-white/10
+        hover:shadow-xl hover:shadow-white/10
       `}
     >
       <span className="relative z-10">{children}</span>
@@ -70,32 +71,38 @@ const GlassButton = ({ children, onClick, variant = "primary", className = "" })
 };
 
 // =====================================================================
-// SECTION: SUBCOMPONENT – CTA Card
+// SECTION: SUBCOMPONENT – CTA Card (CHAPTA & LOW HEIGHT)
 // =====================================================================
 const CTACard = ({ onBookSession, onContactStudio }) => {
   return (
-    <div className="relative z-10 text-center max-w-3xl mx-auto p-6 sm:p-8 md:p-10 rounded-3xl bg-white/5 backdrop-blur-sm border border-white/10 shadow-xl transition-all duration-700 hover:shadow-2xl hover:shadow-primary/5">
-      <h2 className="font-display-lg-mobile text-display-lg-mobile md:text-display-lg text-on-surface uppercase italic leading-none mb-stack-lg">
-        Let's Create <br className="block sm:hidden" /> Magic
-      </h2>
+    <div className="relative z-10 text-center max-w-4xl mx-auto p-5 sm:p-7 md:p-8 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-white/10 via-white/5 to-transparent backdrop-blur-md border border-white/15 shadow-xl transition-all duration-700 hover:shadow-primary/10 hover:border-white/25">
+      <div className="flex flex-col items-center justify-center space-y-3 sm:space-y-4">
+        {/* Heading */}
+        <h2 className="font-display-lg-mobile text-2xl sm:text-3xl md:text-4xl text-on-surface uppercase italic leading-none tracking-wide">
+          Let's Create <br className="block sm:hidden" /> Magic
+        </h2>
 
-      <p className="font-body-lg text-base sm:text-lg md:text-xl text-on-surface-variant max-w-md mx-auto mb-stack-lg leading-relaxed">
-        Now booking for 2026 &amp; 2027 countrywide. Limited seasonal slots available for bespoke
-        commissions.
-      </p>
+        {/* Subtitle */}
+        <p className="font-body-lg text-xs sm:text-sm md:text-base text-on-surface-variant max-w-lg mx-auto leading-relaxed px-2">
+          Now booking for 2026 &amp; 2027 countrywide. Limited seasonal slots available for bespoke
+          commissions.
+        </p>
 
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-6 md:gap-8">
-        <GlassButton variant="primary" onClick={onBookSession}>
-          Book a Session
-        </GlassButton>
-        <GlassButton variant="secondary" onClick={onContactStudio}>
-          Contact Studio
-        </GlassButton>
+        {/* Buttons Group */}
+        <div className="pt-1 w-full flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6">
+          <GlassButton variant="primary" onClick={onBookSession}>
+            Connect on WhatsApp
+          </GlassButton>
+          <GlassButton variant="secondary" onClick={onContactStudio}>
+            Call Studio
+          </GlassButton>
+        </div>
+
+        {/* Response Footer Text */}
+        <p className="font-body-sm text-on-surface-variant/60 pt-1 text-[10px] sm:text-xs tracking-widest uppercase">
+          ✦ Response within few hours ✦
+        </p>
       </div>
-
-      <p className="font-body-sm text-body-sm text-on-surface-variant/50 mt-6 text-xs tracking-wider">
-        ✦ Response within 24 hours ✦
-      </p>
     </div>
   );
 };
@@ -135,13 +142,13 @@ export default function ContactCTA() {
   };
 
   return (
-    <div className="w-full px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12 pb-12 sm:pb-16 bg-background">
+    <div className="w-full px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-6 sm:pb-10 bg-background">
       <section ref={sectionRef} className="relative w-full overflow-hidden rounded-2xl sm:rounded-3xl" id="contact">
         {/* Decorative background blobs */}
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-20 -right-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
-          <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/3 rounded-full blur-3xl" />
+          <div className="absolute -top-20 -right-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl" />
+          <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[24rem] h-[24rem] bg-primary/5 rounded-full blur-3xl" />
         </div>
 
         <Container>

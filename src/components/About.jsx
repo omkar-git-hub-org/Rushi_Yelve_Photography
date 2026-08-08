@@ -2,14 +2,42 @@
 // SECTION: IMPORTS
 // =====================================================================
 import { useEffect, useRef, useState } from "react";
-import { IMAGES } from "../constants/theme";
+import { API_URL, getPhotographerImage } from "../constants/theme";
 
 // =====================================================================
 // SECTION: MAIN COMPONENT – About
 // =====================================================================
 export default function About() {
   const [isVisible, setIsVisible] = useState(false);
+  const [portraitUrl, setPortraitUrl] = useState("");
+  const [loading, setLoading] = useState(true);
   const sectionRef = useRef(null);
+
+  // Dynamic Fetch API call for Photographer Image
+  useEffect(() => {
+    let isMounted = true;
+    const fetchPhotographerPortrait = async () => {
+      try {
+        const response = await fetch(API_URL);
+        const data = await response.json();
+
+        // Extract image using theme helper
+        const url = getPhotographerImage(data);
+        if (isMounted && url) {
+          setPortraitUrl(url);
+        }
+      } catch (error) {
+        console.error("Error fetching photographer image:", error);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchPhotographerPortrait();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Scroll Trigger with Intersection Observer
   useEffect(() => {
@@ -53,7 +81,7 @@ export default function About() {
           </p>
 
           <h2 className="font-headline-lg text-3xl sm:text-4xl md:text-5xl font-bold text-on-surface uppercase italic mb-6 leading-tight">
-            Meet Elara
+            Meet Rushi
           </h2>
 
           <p className="font-body-lg text-base sm:text-lg text-on-surface-variant/90 leading-relaxed mb-6">
@@ -65,14 +93,14 @@ export default function About() {
             "Photography is the only language that can be understood anywhere in the world."
           </blockquote>
 
-          <div>
+          {/* <div>
             <button className="group relative inline-flex items-center gap-3 px-8 py-3.5 border border-primary/40 hover:border-primary text-xs sm:text-sm font-label-caps text-primary uppercase tracking-[0.2em] rounded-full backdrop-blur-sm bg-primary/5 hover:bg-primary hover:text-background transition-all duration-500 hover:shadow-lg hover:shadow-primary/20 transform hover:-translate-y-0.5 active:translate-y-0 overflow-hidden">
               <span className="relative z-10">Read More</span>
               <span className="material-symbols-outlined text-sm relative z-10 transition-transform duration-300 group-hover:translate-x-1">
                 arrow_forward
               </span>
             </button>
-          </div>
+          </div> */}
         </div>
 
         {/* ========================================================= */}
@@ -85,12 +113,18 @@ export default function About() {
         >
           <div className="relative w-full max-w-sm sm:max-w-md aspect-[3/4] border border-white/15 p-3 sm:p-4 rounded-2xl bg-white/5 backdrop-blur-sm shadow-2xl group">
             {/* Image Container with Subtle Zoom Effect */}
-            <div className="w-full h-full overflow-hidden rounded-xl">
-              <img
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                alt={IMAGES?.elaraPortrait?.alt || "Elara Portrait"}
-                src={IMAGES?.elaraPortrait?.src || IMAGES?.elaraPortrait}
-              />
+            <div className="w-full h-full overflow-hidden rounded-xl bg-white/5 flex items-center justify-center">
+              {loading ? (
+                <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+              ) : (
+                portraitUrl && (
+                  <img
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                    alt="Elara Portrait"
+                    src={portraitUrl}
+                  />
+                )
+              )}
             </div>
 
             {/* Floating Experience Badge */}

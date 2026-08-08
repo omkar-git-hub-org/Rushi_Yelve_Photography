@@ -1,6 +1,5 @@
 // ============================================================
 // ELARA STUDIO — Design Tokens
-// Saare colors, fonts, spacing, API yaha constant hai.
 // ============================================================
 
 export const SITE_NAME = "VISTARA STORIES";
@@ -66,7 +65,6 @@ export const RADIUS = {
   full: "9999px",
 };
 
-// Fluid spacing — chhote screen pe kam, bade screen pe zyada, automatically
 export const SPACING = {
   sectionGap: "clamp(64px, 10vw, 160px)",
   stackMd: "16px",
@@ -87,7 +85,6 @@ export const FONT_FAMILY = {
   headlineLg: ["Playfair Display"],
 };
 
-// Fluid font sizes — ab har device pe apne aap sahi size me scale honge
 export const FONT_SIZE = {
   displayLgMobile: ["clamp(2.25rem, 8vw, 3rem)", { lineHeight: "1.1", letterSpacing: "-0.01em", fontWeight: "400" }],
   bodyLg: ["clamp(1rem, 0.6vw + 0.85rem, 1.125rem)", { lineHeight: "1.7", fontWeight: "400" }],
@@ -98,13 +95,85 @@ export const FONT_SIZE = {
   headlineLg: ["clamp(1.75rem, 2.2vw + 1rem, 3rem)", { lineHeight: "1.15", fontWeight: "400" }],
 };
 
+// No hardcoded image URLs
 export const IMAGES = {
-  hero: {
-    src: "https://cdnx.premiumread.com/?url=https://www.japantimes.co.jp/japantimes/uploads/images/2026/06/08/544414.jpg&amp;q=100&amp;f=webp&amp;t=1.53",
-    alt: "A cinematic, high-fashion vertical portrait of a woman in a dramatic flowing black silk gown at twilight.",
-  },
-  elaraPortrait: {
-    src: "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=1200&auto=format&fit=crop",
-    alt: "A professional, moody headshot of a woman named Elara with a sophisticated and confident expression.",
-  },
+  hero: { src: "", alt: "" },
+  elaraPortrait: { src: "", alt: "" },
+};
+
+// ============================================================
+// DYNAMIC EXTRACTION HELPERS (PURE API PARSER - ZERO HARDCODE)
+// ============================================================
+
+const getEventsList = (raw) => {
+  if (Array.isArray(raw)) return raw;
+  if (raw && Array.isArray(raw.events)) return raw.events;
+  if (raw && Array.isArray(raw.data)) return raw.data;
+  return [];
+};
+
+/**
+ * Hero Banner: Extracts latest 'heroUrl' directly from API response
+ */
+export const getHeroImage = (apiData = []) => {
+  const events = getEventsList(apiData);
+  if (!events.length) return "";
+
+  const heroItem = events
+    .filter(
+      (item) =>
+        item?.type === "Hero" ||
+        item?.folderType === "hero-banner"
+    )
+    .sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0))[0];
+
+  if (!heroItem) return "";
+
+  return (
+    heroItem.heroUrl ||
+    (Array.isArray(heroItem.photos) ? heroItem.photos[0] : "") ||
+    heroItem.coverPhoto ||
+    ""
+  );
+};
+
+/**
+ * Photographer Profile: Extracts latest 'photos[0]' or 'coverPhoto' directly from API response
+ */
+export const getPhotographerImage = (apiData = []) => {
+  const events = getEventsList(apiData);
+  if (!events.length) return "";
+
+  const photographerItem = events
+    .filter(
+      (item) =>
+        item?.type === "Photographer" ||
+        item?.folderType === "photographer-profile"
+    )
+    .sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0))[0];
+
+  if (!photographerItem) return "";
+
+  return (
+    (Array.isArray(photographerItem.photos) && photographerItem.photos[0]) ||
+    photographerItem.coverPhoto ||
+    photographerItem.heroUrl ||
+    ""
+  );
+};
+
+/**
+ * Optional: Direct API Fetcher function
+ */
+export const fetchLiveImages = async () => {
+  try {
+    const res = await fetch(API_URL);
+    const data = await res.json();
+    return {
+      heroUrl: getHeroImage(data),
+      photographerUrl: getPhotographerImage(data),
+    };
+  } catch (error) {
+    return { heroUrl: "", photographerUrl: "" };
+  }
 };
