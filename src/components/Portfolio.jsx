@@ -8,7 +8,7 @@ import Container from "./Container";
 import CoverCard from "./CoverCard";
 
 // =====================================================================
-// SECTION: CUSTOM HOOK – Responsive breakpoint (matches Tailwind md/lg)
+// SECTION: CUSTOM HOOK – Responsive breakpoint
 // =====================================================================
 const useBreakpoint = () => {
   const [bp, setBp] = useState("mobile");
@@ -28,9 +28,6 @@ const useBreakpoint = () => {
   return bp;
 };
 
-// Config: har breakpoint ke liye max cards aur kitne columns
-// (rows deliberately fix NAHI ki gayi — auto-size hoti hain content ke hisaab se,
-// warna items kam hone par grid khaali black rows reserve kar leta hai)
 const GRID_CONFIG = {
   mobile: { count: 3, gridClass: "grid-cols-1" },
   tablet: { count: 4, gridClass: "grid-cols-2" },
@@ -107,8 +104,7 @@ const SectionTitle = ({ title }) => (
 );
 
 // =====================================================================
-// SECTION: SUBCOMPONENT – Portfolio Grid (responsive count + shape,
-// auto-sized rows so missing photos never leave a black gap)
+// SECTION: SUBCOMPONENT – Portfolio Grid
 // =====================================================================
 const PortfolioGrid = ({ events, onCardClick, breakpoint }) => {
   const { count, gridClass } = GRID_CONFIG[breakpoint];
@@ -136,40 +132,48 @@ export default function Portfolio() {
   const { events, loading, error } = useEvents();
   const breakpoint = useBreakpoint();
 
-  const sortedEvents = [...events]
+  // 🔍 FILTER & SORT: Hero, Photographer, aur Website items ko Portfolio me se hata diya gaya hai
+  const sortedEvents = events
+    .filter((e) => {
+      const type = (e.type || "").toLowerCase();
+      const id = (e.eventId || "").toLowerCase();
+
+      return (
+        type !== "hero" &&
+        type !== "photographer" &&
+        type !== "website" &&
+        !id.startsWith("hero-") &&
+        !id.startsWith("photographer-") &&
+        id !== "hero_banner" &&
+        id !== "website-assets"
+      );
+    })
     .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
 
   const goToGallery = (type) =>
     navigate(type ? `/portfolio?type=${encodeURIComponent(type)}` : "/portfolio");
 
   return (
-    // ---- OUTER CONTAINER (normal section spacing) ----
     <div className="w-full px-4 sm:px-6 lg:px-8 pt-8 md:pt-12 pb-8 md:pb-12 bg-background">
       <section className="relative w-full">
         <Container>
-          {/* Title */}
           <SectionTitle title="Portfolio" />
 
-          {/* Loading state */}
           {loading && <LoadingSkeleton />}
 
-          {/* Error state */}
           {error && <ErrorState message="Couldn't load events right now." />}
 
-          {/* Success state – only render if not loading and no error */}
           {!loading && !error && (
             <>
               {sortedEvents.length === 0 && <EmptyState />}
 
               {sortedEvents.length > 0 && (
                 <>
-                  {/* Grid of covers — responsive count + auto rows */}
                   <PortfolioGrid
                     events={sortedEvents}
                     onCardClick={goToGallery}
                     breakpoint={breakpoint}
                   />
-                  {/* See All button – placed outside the grid */}
                   <SeeAllButton onClick={() => goToGallery()} />
                 </>
               )}
