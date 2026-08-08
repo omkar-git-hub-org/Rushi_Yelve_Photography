@@ -39,11 +39,13 @@ const FooterLink = ({ href, children }) => (
 );
 
 // =====================================================================
-// SECTION: SUBCOMPONENT – SocialIcon
+// SECTION: SUBCOMPONENT – SocialIcon (Updated to accept href, target, and rel)
 // =====================================================================
-const SocialIcon = ({ icon: Icon, label }) => (
+const SocialIcon = ({ icon: Icon, label, href }) => (
   <a
-    href="#"
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
     aria-label={label}
     className="text-on-surface-variant hover:text-primary transition-all duration-300 hover:scale-110 hover:rotate-6"
   >
@@ -97,17 +99,20 @@ export default function Footer() {
 
             {/* Navigation links – horizontal on all screens, centered */}
             <div className="flex flex-wrap items-center justify-center gap-6 md:gap-8">
-              <FooterLink href="#">Portfolio</FooterLink>
-              <FooterLink href="#">Journal</FooterLink>
-              <FooterLink href="#">Contact</FooterLink>
+              <FooterLink href="#">Home</FooterLink>
+              <FooterLink href="portfolio">Portfolio</FooterLink>
+              {/* <FooterLink href="#">Journal</FooterLink> */}
+              {/* <FooterLink href="#contact">Contact</FooterLink> */}
               <FooterLink href="#">Privacy</FooterLink>
             </div>
-
+            <div className="flex flex-wrap items-center justify-center gap-6 md:gap-8">
+              <FooterLink href="#">Phone - +91 7741019816</FooterLink>
+            </div>
             {/* Social icons */}
             <div className="flex items-center gap-4">
-              <SocialIcon icon={SocialIcons.Instagram} label="Instagram" />
-              <SocialIcon icon={SocialIcons.Facebook} label="Facebook" />
-              <SocialIcon icon={SocialIcons.Twitter} label="Twitter" />
+              <SocialIcon icon={SocialIcons.Instagram} label="Instagram" href="https://instagram.com/vistarastories"/>
+              {/* <SocialIcon icon={SocialIcons.Facebook} label="Facebook" href="https://facebook.com/vistarastories"/> */}
+              {/* <SocialIcon icon={SocialIcons.Twitter} label="Twitter" /> */}
             </div>
           </div>
 

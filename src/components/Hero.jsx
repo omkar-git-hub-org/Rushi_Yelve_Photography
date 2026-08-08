@@ -2,8 +2,8 @@
 // SECTION: IMPORTS
 // =====================================================================
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";  // ← ADDED
-import { SITE_TAGLINE, ESTABLISHED_YEAR, IMAGES } from "../constants/theme";
+import { useNavigate } from "react-router-dom";
+import { SITE_TAGLINE, ESTABLISHED_YEAR, API_URL, getHeroImage } from "../constants/theme";
 
 // =====================================================================
 // SECTION: CUSTOM HOOK – Parallax Scroll
@@ -24,26 +24,28 @@ const useParallax = (speed = 0.5) => {
 const HeroBackground = ({ imageSrc, altText }) => {
   const offsetY = useParallax(0.2);
 
+  const srcUrl = typeof imageSrc === "string" ? imageSrc : (imageSrc?.src || imageSrc?.desktop || "");
+
   return (
     <div className="absolute inset-0 z-0 overflow-hidden">
       {/* Mobile image */}
       <img
         className="w-full h-full object-cover object-center md:hidden"
-        src={imageSrc.mobile || imageSrc.src}
+        src={imageSrc?.mobile || srcUrl}
         alt={altText}
         style={{ transform: `translateY(${offsetY * 0.5}px)` }}
       />
       {/* Tablet image */}
       <img
         className="w-full h-full object-cover object-center hidden md:block lg:hidden"
-        src={imageSrc.tablet || imageSrc.src}
+        src={imageSrc?.tablet || srcUrl}
         alt={altText}
         style={{ transform: `translateY(${offsetY * 0.3}px)` }}
       />
       {/* Desktop image */}
       <img
         className="w-full h-full object-cover object-center hidden lg:block"
-        src={imageSrc.desktop || imageSrc.src}
+        src={imageSrc?.desktop || srcUrl}
         alt={altText}
         style={{ transform: `translateY(${offsetY * 0.1}px)` }}
       />
@@ -60,7 +62,7 @@ const HeroBackground = ({ imageSrc, altText }) => {
 // SECTION: SUBCOMPONENT – Hero Content
 // =====================================================================
 const HeroContent = ({ tagline, establishedYear, onExploreClick }) => {
-  const words = tagline.split(" ");
+  const words = tagline ? tagline.split(" ") : [];
 
   return (
     <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center lg:items-start justify-center h-full py-6 sm:py-12 md:py-16">
@@ -92,7 +94,7 @@ const HeroContent = ({ tagline, establishedYear, onExploreClick }) => {
 };
 
 // =====================================================================
-// SECTION: SUBCOMPONENT – Hero Button (now accepts onClick)
+// SECTION: SUBCOMPONENT – Hero Button
 // =====================================================================
 const HeroButton = ({ onClick }) => (
   <button
@@ -121,18 +123,52 @@ const ScrollIndicator = () => (
 );
 
 // =====================================================================
-// SECTION: MAIN COMPONENT – Hero
+// SECTION: MAIN COMPONENT – Hero (DYNAMIC API FETCH ADDED)
 // =====================================================================
 export default function Hero() {
-  const navigate = useNavigate();  // ← NEW
+  const navigate = useNavigate();
+  const [heroImgUrl, setHeroImgUrl] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const tagline = SITE_TAGLINE;
   const established = ESTABLISHED_YEAR;
-  const image = IMAGES.hero;
 
-  // 🔥 Handler to navigate to the portfolio gallery page
+  // Dynamic Fetch API call on Mount
+  useEffect(() => {
+    let isMounted = true;
+    const fetchHeroBanner = async () => {
+      try {
+        const response = await fetch(API_URL);
+        const data = await response.json();
+        
+        // Dynamic Extraction using theme/tokens helper
+        const url = getHeroImage(data);
+        if (isMounted && url) {
+          setHeroImgUrl(url);
+        }
+      } catch (error) {
+        console.error("Hero Image Fetching Error:", error);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchHeroBanner();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const handleExploreClick = () => {
     navigate("/portfolio");
+  };
+
+  const imageObj = {
+    src: heroImgUrl,
+    desktop: heroImgUrl,
+    tablet: heroImgUrl,
+    mobile: heroImgUrl,
+    alt: "Hero Banner",
   };
 
   return (
@@ -140,15 +176,21 @@ export default function Hero() {
       <section
         className="relative w-full overflow-hidden rounded-2xl sm:rounded-3xl shadow-2xl
                    min-h-[76vh] sm:min-h-[65vh] md:min-h-[85vh] lg:min-h-[80vh]
-                   flex items-center justify-center"
+                   flex items-center justify-center bg-gray-900"
       >
-        <HeroBackground imageSrc={image} altText={image.alt} />
-        <HeroContent
-          tagline={tagline}
-          establishedYear={established}
-          onExploreClick={handleExploreClick}  // ← PASSED
-        />
-        <ScrollIndicator />
+        {loading ? (
+          <HeroSkeleton />
+        ) : (
+          <>
+            {heroImgUrl && <HeroBackground imageSrc={imageObj} altText={imageObj.alt} />}
+            <HeroContent
+              tagline={tagline}
+              establishedYear={established}
+              onExploreClick={handleExploreClick}
+            />
+            <ScrollIndicator />
+          </>
+        )}
 
         <style>{`
           @keyframes fade-in-up {
@@ -185,7 +227,7 @@ export default function Hero() {
 // SECTION: ADDITIONAL UTILITIES
 // =====================================================================
 export const HeroSkeleton = () => (
-  <div className="w-full min-h-[70vh] lg:min-h-[80vh] bg-gray-800 animate-pulse flex items-center justify-center rounded-2xl sm:rounded-3xl">
+  <div className="w-full min-h-[70vh] lg:min-h-[80vh] bg-gray-900 animate-pulse flex items-center justify-center rounded-2xl sm:rounded-3xl">
     <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin" />
   </div>
 );
