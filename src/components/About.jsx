@@ -85,8 +85,7 @@ export default function About() {
           </h2>
 
           <p className="font-body-lg text-base sm:text-lg text-on-surface-variant/90 leading-relaxed mb-6">
-            With over a decade of traversing the globe capturing the unseen, my work is a dialogue
-            between light and shadow. I don't just take photos; I curate moments of eternal silence.
+            We’re available for photography services across the country. To give each project the time and attention it deserves, we accept a limited number of custom bookings each season. Get in touch with us to discuss your photography needs.
           </p>
 
           <blockquote className="font-body-md text-sm sm:text-base text-on-surface-variant/80 italic border-l-2 border-primary/50 pl-4 py-1 mb-8 bg-white/5 rounded-r-lg">

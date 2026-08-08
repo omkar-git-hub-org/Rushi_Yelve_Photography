@@ -105,7 +105,7 @@ export default function Testimonial() {
             }`}
           >
             <TestimonialCard
-              quote="Rushi has an uncanny ability to find beauty in the most unexpected places. Her work for our wedding didn't just document the day; it transformed it into a masterpiece of memory."
+              quote="The photographs of our wedding are more beautiful than we could have imagined. Every smile, emotion, and little moment was captured so beautifully, allowing us to relive our special day through every photograph."
               author="Shruti &amp; Ajay"
             />
           </div>
