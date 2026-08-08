@@ -52,7 +52,7 @@ const FilterButtons = ({ types, activeType, onTypeClick }) => {
 };
 
 // =====================================================================
-// SECTION: SUBCOMPONENT – Gallery Grid (staggered cards)
+// SECTION: SUBCOMPONENT – Gallery Grid
 // =====================================================================
 const GalleryGrid = ({ events, onCardClick }) => {
   return (
@@ -104,10 +104,31 @@ export default function Gallery() {
   const [activeType, setActiveType] = useState(searchParams.get("type") || "ALL");
   const [activeEvent, setActiveEvent] = useState(null);
 
-  const types = useMemo(() => {
-    const unique = Array.from(new Set(events.map((e) => e.type)));
-    return ["ALL", ...unique];
+  // 🔍 FILTER BASE EVENTS: Hero Banner, Photographer aur Website Assets ko exclude kiya gaya hai
+  const cleanEvents = useMemo(() => {
+    return events.filter((e) => {
+      const type = (e.type || "").toLowerCase();
+      const id = (e.eventId || "").toLowerCase();
+
+      return (
+        type !== "hero" &&
+        type !== "photographer" &&
+        type !== "website" &&
+        !id.startsWith("hero-") &&
+        !id.startsWith("photographer-") &&
+        id !== "hero_banner" &&
+        id !== "website-assets"
+      );
+    });
   }, [events]);
+
+  // Filter category buttons sirf valid events ke type se hi banenge
+  const types = useMemo(() => {
+    const unique = Array.from(
+      new Set(cleanEvents.map((e) => e.type).filter(Boolean))
+    );
+    return ["ALL", ...unique];
+  }, [cleanEvents]);
 
   useEffect(() => {
     const urlType = searchParams.get("type");
@@ -115,9 +136,9 @@ export default function Gallery() {
   }, [searchParams]);
 
   const filteredEvents = useMemo(() => {
-    if (activeType === "ALL") return events;
-    return events.filter((e) => e.type === activeType);
-  }, [events, activeType]);
+    if (activeType === "ALL") return cleanEvents;
+    return cleanEvents.filter((e) => e.type === activeType);
+  }, [cleanEvents, activeType]);
 
   const handleTypeClick = (type) => {
     setActiveType(type);
@@ -132,13 +153,6 @@ export default function Gallery() {
       <div className="w-full px-4 sm:px-6 lg:px-8 pt-28 md:pt-32 lg:pt-36 pb-8 md:pb-8 bg-background">
         <section className="relative w-full">
           <Container>
-            {/* ===== Page Header – Clean, NO LINE ===== */}
-            {/* <div className="mb-stack-lg animate-fade-up" style={{ animationDelay: "0s" }}>
-              <h1 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface uppercase italic">
-                Full Portfolio
-              </h1>
-            </div> */}
-
             {/* ===== Filter Buttons ===== */}
             <FilterButtons
               types={types}
